@@ -12,6 +12,7 @@ class WebsiteContentMap:
     def __init__(self, url):
         self.url = url
         self.nodes = []
+        self.create_nodes()
 
     def get_url(self):
         return self.url
@@ -40,7 +41,6 @@ class WebsiteContentMap:
         g.add_node(root_url)
         visited = set([root_url])
         queue = [root_url]
-        self.create_nodes()  # extract links once
         while queue:
             current_url = queue.pop(0)
             for link in self.get_nodes():
@@ -50,7 +50,7 @@ class WebsiteContentMap:
                     g.add_node(link)
                     g.add_edge(current_url, link)
         pos = nx.spring_layout(g, seed=42)
-        nx.draw(g, pos, with_labels=True, node_size=1000, font_size=14, arrows=False)
+        nx.draw(g, pos, with_labels=True, node_size=1000, font_size=9, arrows=False)
         plt.savefig('mindmap.png', bbox_inches='tight')
 
 
