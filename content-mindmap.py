@@ -1,7 +1,8 @@
 import requests
 from bs4 import BeautifulSoup
 from urllib.parse import urlparse
-from graph_tools import Graph
+import networkx as nx
+import matplotlib.pyplot as plt
 
 class WebsiteContentMap:
     """
@@ -25,13 +26,10 @@ class WebsiteContentMap:
                 links.append(href)
         return links
     
-    def create_mind_map():
-        url = self.get_url()
-        g = gt.Graph(directed=True)
-        vprop = g.new_vertex_property("string")
+    def create_mind_map(url):
+        g = nx.DiGraph()
         root_url = urlparse(url).scheme + '://' + urlparse(url).netloc
-        v = g.add_vertex()
-        vprop[v] = root_url
+        g.add_node(root_url)
         visited = set([root_url])
         queue = [root_url]
         while queue:
@@ -40,7 +38,12 @@ class WebsiteContentMap:
                 if link not in visited:
                     visited.add(link)
                     queue.append(link)
-                    v2 = g.add_vertex()
-                    vprop[v2] = urlparse(link).path
-                    g.add_edge(v, v2)
-        gt.graph_draw(g, vertex_text=vprop, vertex_font_size=18, output='mindmap.png')
+                    g.add_node(link)
+                    g.add_edge(current_url, link)
+        pos = nx.spring_layout(g)
+        nx.draw(g, pos, with_labels=True, node_size=1000, font_size=14)
+        plt.savefig('mindmap.png', bbox_inches='tight')
+
+
+aginic = WebsiteContentMap('https://aginic.com/')
+aginic.create_mind_map()
