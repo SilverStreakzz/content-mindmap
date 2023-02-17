@@ -24,33 +24,38 @@ class WebsiteContentMap:
         self.nodes = nodes
 
     def create_nodes(self):
-        url = self.get_url()
-        links = {"inbound": [], "outbound": []}
-        r = requests.get(url)
-        print(f'Getting links from {url}...')
-        soup = BeautifulSoup(r.content, 'html.parser')
-        for link in soup.find_all('a'):
-            href = link.get('href')
-            if href is not None:
-                if urlparse(href).netloc == urlparse(url).netloc:
-                    links["inbound"].append(href)
-                else:
-                    links["outbound"].append(href)
-        self.set_nodes(links)
+            url = self.get_url()
+            links = []
+            r = requests.get(url)
+            print(f'Getting links from {url}...')
+            soup = BeautifulSoup(r.content, 'html.parser')
+            for link in soup.find_all('a'):
+                href = link.get('href')
+                if href is not None and urlparse(href).netloc == urlparse(url).netloc and urlparse(href).path and href.startswith('https'):
+                    links.append(href)
+            self.set_nodes(links)
 
-    def get_links(self, url):
-        links = {"inbound": [], "outbound": []}
-        r = requests.get(url)
-        print(f'Getting links from {url}...')
+    def get_inbound_links(self, node):
+        inbound_links = set()
+        for n in self.get_nodes():
+            if n != node and node.startswith('https') and n.startswith('https'):
+                r = requests.get(n)
+                soup = BeautifulSoup(r.content, 'html.parser')
+                for link in soup.find_all('a'):
+                    href = link.get('href')
+                    if href is not None and urlparse(href).netloc == urlparse(node).netloc and href.startswith('https'):
+                        inbound_links.add(href)
+        return list(inbound_links)
+
+    def get_outbound_links(self, node):
+        outbound_links = set()
+        r = requests.get(node)
         soup = BeautifulSoup(r.content, 'html.parser')
         for link in soup.find_all('a'):
             href = link.get('href')
-            if href is not None:
-                if urlparse(href).netloc == urlparse(url).netloc:
-                    links["inbound"].append(href)
-                else:
-                    links["outbound"].append(href)
-        return links
+            if href is not None and urlparse(href).netloc == urlparse(node).netloc and href.startswith('https'):
+                outbound_links.add(href)
+        return list(outbound_links)
 
     def create_mind_map(self):
         g = nx.DiGraph()
@@ -71,6 +76,6 @@ class WebsiteContentMap:
         plt.gcf().set_size_inches(18, 12)
         plt.savefig('mindmap.png', bbox_inches='tight')
 
-aginic = WebsiteContentMap('https://aginic.com/')
-links = aginic.get_links('https://aginic.com/blog/machine-learning/')
+dataAnalytics = WebsiteContentMap('https://aginic.com/data-insights/')
+links = dataAnalytics.get_outbound_links('https://aginic.com/data-insights/')
 print(links)
