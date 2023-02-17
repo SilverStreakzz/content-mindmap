@@ -25,25 +25,31 @@ class WebsiteContentMap:
 
     def create_nodes(self):
         url = self.get_url()
-        links = {}
+        links = {"inbound": [], "outbound": []}
         r = requests.get(url)
         print(f'Getting links from {url}...')
         soup = BeautifulSoup(r.content, 'html.parser')
         for link in soup.find_all('a'):
             href = link.get('href')
-            if href is not None and urlparse(href).netloc == urlparse(url).netloc:
-                links[href] = self.get_links(href)
+            if href is not None:
+                if urlparse(href).netloc == urlparse(url).netloc:
+                    links["inbound"].append(href)
+                else:
+                    links["outbound"].append(href)
         self.set_nodes(links)
 
     def get_links(self, url):
-        links = []
+        links = {"inbound": [], "outbound": []}
         r = requests.get(url)
         print(f'Getting links from {url}...')
         soup = BeautifulSoup(r.content, 'html.parser')
         for link in soup.find_all('a'):
             href = link.get('href')
-            if href is not None and urlparse(href).netloc == urlparse(urlparse(url).geturl()).netloc:
-                links.append(href)
+            if href is not None:
+                if urlparse(href).netloc == urlparse(url).netloc:
+                    links["inbound"].append(href)
+                else:
+                    links["outbound"].append(href)
         return links
 
     def create_mind_map(self):
@@ -54,7 +60,7 @@ class WebsiteContentMap:
         queue = [root_url]
         while queue:
             current_url = queue.pop(0)
-            for link in self.get_nodes().get(current_url, []):
+            for link in self.get_nodes().get(current_url, {}).get("outbound", []):
                 if link not in visited:
                     visited.add(link)
                     queue.append(link)
@@ -65,6 +71,6 @@ class WebsiteContentMap:
         plt.gcf().set_size_inches(18, 12)
         plt.savefig('mindmap.png', bbox_inches='tight')
 
-
 aginic = WebsiteContentMap('https://aginic.com/')
-aginic.create_mind_map()
+links = aginic.get_links('https://aginic.com/blog/machine-learning/')
+print(links)
