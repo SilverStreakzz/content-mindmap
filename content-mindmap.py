@@ -26,7 +26,8 @@ class WebsiteContentMap:
                 links.append(href)
         return links
     
-    def create_mind_map(url):
+    def create_mind_map(self):
+        url = self.get_url()
         g = nx.DiGraph()
         root_url = urlparse(url).scheme + '://' + urlparse(url).netloc
         g.add_node(root_url)
@@ -34,14 +35,14 @@ class WebsiteContentMap:
         queue = [root_url]
         while queue:
             current_url = queue.pop(0)
-            for link in get_internal_links(current_url):
+            for link in self.get_internal_links():
                 if link not in visited:
                     visited.add(link)
                     queue.append(link)
                     g.add_node(link)
                     g.add_edge(current_url, link)
         pos = nx.spring_layout(g)
-        nx.draw(g, pos, with_labels=True, node_size=1000, font_size=14)
+        nx.draw(g, pos, with_labels=True, node_size=1000, font_size=9)
         plt.savefig('mindmap.png', bbox_inches='tight')
 
 
