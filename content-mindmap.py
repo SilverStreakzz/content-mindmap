@@ -61,10 +61,10 @@ class WebsiteContentMap:
                     g.add_node(link)
                     g.add_edge(current_url, link)
         pos = nx.spring_layout(g, seed=42)
-        nx.draw(g, pos, with_labels=True, node_size=1000, font_size=6, arrows=False)
+        nx.draw(g, pos, with_labels=True, node_size=3000, font_size=10, arrows=False)
+        plt.gcf().set_size_inches(18, 12)
         plt.savefig('mindmap.png', bbox_inches='tight')
 
 
 aginic = WebsiteContentMap('https://aginic.com/')
 aginic.create_mind_map()
-
