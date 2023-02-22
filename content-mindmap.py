@@ -14,6 +14,19 @@ class WebsiteMap:
         self.nodes = {}
         self.create_nodes()
     
+    def filter_links(self, links):
+        """ Filter links.
+        
+        Filters the list of links to remove any that are not a part of the main website url.
+        """
+        url = get_url()
+        filtered_links = []
+        for link in links:
+            if link.startswith(url):
+                filtered_links.append(link)
+
+        return filtered_links
+    
     def create_links(self, url):
         """ Create links.
         
@@ -28,20 +41,8 @@ class WebsiteMap:
                 link_domain = urlparse(href).netloc
                 if link_domain == urlparse(url).netloc:
                     links.append(href)
-        return links
-    
-    def filter_links(self, links):
-        """ Filter links.
         
-        Filters the list of links to remove any that are not a part of the main website url.
-        """
-        url = get_url()
-        filtered_links = []
-        for link in links:
-            if link.startswith(url):
-                filtered_links.append(link)
-
-        return filtered_links
+        return self.filter_links(links)
     
     def create_link_dict(self):
         """ Create link dictionary.
@@ -50,18 +51,8 @@ class WebsiteMap:
 
         Sample output:
             {
-                "https://aginic.com/blog/": 
-                [
-                    "https://aginic.com/blog/what-is-a-mind-map/",
-                    "https://aginic.com/blog/analytics/",
-                    "https://aginic.com/blog/machine-learning/"
-                    ],
-                "https://aginic.com/blog/what-is-a-mind-map/":
-                [
-                    "https://aginic.com/blog/",
-                    ],
-                "https://aginic.com/blog/analytics/": [],
-                "https://aginic.com/blog/machine-learning/": []
+                "https://aginic.com/blog/": ["https://aginic.com/blog/what-is-a-mind-map/"],
+                "https://aginic.com/blog/what-is-a-mind-map/": ["https://aginic.com/blog/, "https://aginic.com/analytics/"]
                 }
         """
         url = self.get_url()
